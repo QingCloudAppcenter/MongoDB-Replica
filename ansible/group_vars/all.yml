@@ -1,0 +1,12 @@
+---
+local_cache_path: "~/.ansible/cache"
+app_version: 2.0.0
+mongodb_version: 3.6.8
+node_exporter_version: 1.2.2
+mongo_shake_version: 2.6.5
+mongodb_exporter_version: 0.20.9
+caddy_version: 2.4.6
+appagent_version: 1.0.7
+zabbix_agent2_version: 5.4.8
+arch1: arm64
+arch2: arm64
