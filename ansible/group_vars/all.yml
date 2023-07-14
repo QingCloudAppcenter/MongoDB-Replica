@@ -9,3 +9,4 @@ caddy_version: 2.4.6
 appagent_version: 1.0.7
 arch1: amd64
 arch2: x86_64
+arch3: arm64

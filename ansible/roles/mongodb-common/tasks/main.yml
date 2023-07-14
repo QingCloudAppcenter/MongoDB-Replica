@@ -6,56 +6,82 @@
     shell: /sbin/nologin
     create_home: false
 
-- name: re-install ca-certificates,jq,bc
-  apt:
-    update_cache: yes
-    name: ['ca-certificates','jq','bc']
-    state: latest
+# - name: re-install ca-certificates,jq,bc
+#   dnf:
+#     update_cache: yes
+#     name: ['ca-certificates','jq','bc']
+#     state: latest
 
-- name: add zabbix repo config
-  shell: curl -o - https://mirrors.aliyun.com/zabbix/zabbix-official-repo.key | apt-key add -; echo deb https://mirrors.aliyun.com/zabbix/zabbix/5.4/ubuntu $(lsb_release -cs) main > /etc/apt/sources.list.d/zabbix-aliyun.list; apt update
-
-- name: apt install zabbix-agent2
-  apt:
-    update_cache: yes
-    name: ['zabbix-agent2', 'zabbix-get', 'zabbix-sender']
+- name: Install python3-dnf package
+  dnf:
+    name: python3-dnf
     state: present
 
-- name: stop zabbix-agent
-  systemd:
-    name: zabbix-agent2
-    enabled: no
-    state: stopped
+- name : install ca-certificates
+  dnf: 
+    name: ca-certificates
+    state: present
 
-- name: download app-agent
-  include_role:
-    name: install-1.0.6
-  vars:
-    opts:
-      pkg_name: app-agent
-      pkg_version: "{{ appagent_version }}"
-      pkg_url: https://github.com/QingCloudAppcenter/AppcenterAgent/releases/download/v{{ appagent_version }}/app-agent-linux-{{ arch1 }}.tar.gz
-      pkg_type: tar.gz
-      extracts: no
+- name : install jq
+  dnf: 
+    name: jq
+    state: present
 
-- name: remove app-agent's tar.gz
-  file:
-    path: /opt/app-agent
-    state: absent
+- name : install bc
+  dnf: 
+    name: bc
+    state: present
 
-- name: unarchive app-agent
-  unarchive:
-    src: "{{ local_cache_path }}/{{ role_name }}/app-agent-{{ appagent_version }}.tar.gz"
-    dest: /tmp
-    remote_src: no
+# - name: add zabbix repo config
+#   shell: curl -o - https://mirrors.aliyun.com/zabbix/zabbix-official-repo.key | apt-key add -; echo deb https://mirrors.aliyun.com/zabbix/zabbix/5.4/ubuntu $(lsb_release -cs) main > /etc/apt/sources.list.d/zabbix-aliyun.list; apt update
 
-- name: install app-agent
-  shell: /tmp/app-agent-linux-{{ arch1 }}/install.sh
-  become: true
-  become_user: root
-  args:
-    chdir: /tmp/app-agent-linux-{{ arch1 }}/
-    creates: /opt/qingcloud/app-agent
+# - name: install zabbix-agent2
+#   dnf:
+#     name: ['zabbix-agent2', 'zabbix-get', 'zabbix-sender']
+#     state: present
+
+- name: install zabbix-agent2
+  dnf:
+    name: ['pcp-export-zabbix-agent']
+    state: present
+
+# Exception: unable to find zabbix-agent.service
+# - name: stop zabbix-agent
+#   systemd:
+#     name: zabbix-agent2
+#     enabled: no
+#     state: stopped
+
+# 手动下载
+# - name: download app-agent
+#   include_role:
+#     name: install-1.0.6
+#   vars:
+#     opts:
+#       pkg_name: app-agent
+#       pkg_version: "{{ appagent_version }}"
+#       pkg_url: https://github.com/QingCloudAppcenter/AppcenterAgent/releases/download/v{{ appagent_version }}/app-agent-linux-{{ arch3 }}.tar.gz
+#       pkg_type: tar.gz
+#       extracts: no
+
+# - name: remove app-agent's tar.gz
+#   file:
+#     path: /opt/app-agent
+#     state: absent
+
+# - name: unarchive app-agent
+#   unarchive:
+#     src: "{{ local_cache_path }}/{{ role_name }}/app-agent-{{ appagent_version }}.tar.gz"
+#     dest: /tmp
+#     remote_src: no
+
+# - name: install app-agent
+#   shell: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/install.sh
+#   become: true
+#   become_user: root
+#   args:
+#     chdir: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/
+#     creates: /opt/qingcloud/app-agent
 
 - name: create group caddy
   group:
@@ -78,7 +104,7 @@
     opts:
       pkg_name: caddy
       pkg_version: "{{ caddy_version }}"
-      pkg_url: https://github.com/caddyserver/caddy/releases/download/v{{ caddy_version }}/caddy_{{ caddy_version }}_linux_{{ arch1 }}.tar.gz
+      pkg_url: https://github.com/caddyserver/caddy/releases/download/v{{ caddy_version }}/caddy_{{ caddy_version }}_linux_{{ arch3 }}.tar.gz
       pkg_type: tar.gz
       creates: bin
       extracts: yes
@@ -104,7 +130,7 @@
     opts:
       pkg_name: mongodb_exporter
       pkg_version: "{{ mongodb_exporter_version }}"
-      pkg_url: https://github.com/percona/mongodb_exporter/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.linux-{{ arch1 }}.tar.gz
+      pkg_url: https://github.com/percona/mongodb_exporter/releases/download/v{{ mongodb_exporter_version }}/mongodb_exporter-{{ mongodb_exporter_version }}.linux-{{ arch3 }}.tar.gz
       pkg_type: tar.gz
       creates: bin
       extracts: yes
@@ -118,7 +144,7 @@
     opts:
       pkg_name: node_exporter
       pkg_version: "{{ node_exporter_version }}"
-      pkg_url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ arch1 }}.tar.gz
+      pkg_url: https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter_version }}/node_exporter-{{ node_exporter_version }}.linux-{{ arch3 }}.tar.gz
       pkg_type: tar.gz
       creates: bin
       extracts: yes
@@ -132,7 +158,7 @@
     opts:
       pkg_name: mongodb
       pkg_version: "{{ mongodb_version }}"
-      pkg_url: https://fastdl.mongodb.org/linux/mongodb-linux-{{ arch2 }}-{{ mongodb_version }}.tgz
+      pkg_url: https://fastdl.mongodb.org/linux/mongodb-linux-{{ arch3 }}-{{ mongodb_version }}.tgz
       pkg_type: tgz
       creates: bin
       extracts: yes
@@ -154,19 +180,19 @@
     dest: /etc/systemd/
     directory_mode: u=rwx,g=rx,o=rx
 
-- name: modify /opt/app/current/bin/ctl.sh
-  shell: sed -i 's/local f; for f in $(find \/opt\/app\/current\/bin\/node\/ -name "$fileNames.sh"); do . $f; done/local f; for f in $(eval echo "{$fileNames}.sh"); do . \/opt\/app\/current\/bin\/node\/$f; done/' /opt/app/current/bin/ctl.sh
+# - name: modify /opt/app/current/bin/ctl.sh
+#   shell: sed -i 's/local f; for f in $(find \/opt\/app\/current\/bin\/node\/ -name "$fileNames.sh"); do . $f; done/local f; for f in $(eval echo "{$fileNames}.sh"); do . \/opt\/app\/current\/bin\/node\/$f; done/' /opt/app/current/bin/ctl.sh
   
 - name: install confd files
   include_role:
     name: confd-files-1.1.0
 
-- name: mask irqbalance.service
-  systemd:
-    name: irqbalance
-    enabled: no
-    masked: yes
-    state: stopped
+# - name: mask irqbalance.service
+#   systemd:
+#     name: irqbalance
+#     enabled: no
+#     masked: yes
+#     state: stopped
 
 - name: enable disable-thp.service
   systemd:

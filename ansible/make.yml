@@ -2,6 +2,7 @@
 - name: mongodb tasks
   hosts: all
   vars:
+    ansible_python_interpreter: /usr/bin/python3
     target_env: "{{ lookup('env', 'target') }}"
   tasks:
   - include_role:
@@ -10,8 +11,10 @@
     - update-apt-sources-1.0.0
     - disable-apt-jobs-1.0.0
     - disable-motd-1.0.0
-    # - app-agent-1.1.1
+    - app-agent
     - appctl-1.2.7
+    - install-1.0.6
+    # - jq
     - mongodb-common
     loop_control:
       loop_var: name
