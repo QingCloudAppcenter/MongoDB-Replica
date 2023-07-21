@@ -32,6 +32,15 @@
     name: bc
     state: present
 
+- name : install tar
+  dnf: 
+    name: tar
+    state: present
+
+- name : install unzip
+  dnf: 
+    name: unzip
+    state: present
 # - name: add zabbix repo config
 #   shell: curl -o - https://mirrors.aliyun.com/zabbix/zabbix-official-repo.key | apt-key add -; echo deb https://mirrors.aliyun.com/zabbix/zabbix/5.4/ubuntu $(lsb_release -cs) main > /etc/apt/sources.list.d/zabbix-aliyun.list; apt update
 
@@ -52,36 +61,36 @@
 #     enabled: no
 #     state: stopped
 
-# 手动下载
-# - name: download app-agent
-#   include_role:
-#     name: install-1.0.6
-#   vars:
-#     opts:
-#       pkg_name: app-agent
-#       pkg_version: "{{ appagent_version }}"
-#       pkg_url: https://github.com/QingCloudAppcenter/AppcenterAgent/releases/download/v{{ appagent_version }}/app-agent-linux-{{ arch3 }}.tar.gz
-#       pkg_type: tar.gz
-#       extracts: no
 
-# - name: remove app-agent's tar.gz
-#   file:
-#     path: /opt/app-agent
-#     state: absent
+- name: download app-agent
+  include_role:
+    name: install-1.0.6
+  vars:
+    opts:
+      pkg_name: app-agent
+      pkg_version: "{{ appagent_version }}"
+      pkg_url: https://github.com/QingCloudAppcenter/AppcenterAgent/releases/download/v{{ appagent_version }}/app-agent-linux-{{ arch3 }}.tar.gz
+      pkg_type: tar.gz
+      extracts: no
 
-# - name: unarchive app-agent
-#   unarchive:
-#     src: "{{ local_cache_path }}/{{ role_name }}/app-agent-{{ appagent_version }}.tar.gz"
-#     dest: /tmp
-#     remote_src: no
+- name: remove app-agent's tar.gz
+  file:
+    path: /opt/app-agent
+    state: absent
 
-# - name: install app-agent
-#   shell: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/install.sh
-#   become: true
-#   become_user: root
-#   args:
-#     chdir: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/
-#     creates: /opt/qingcloud/app-agent
+- name: unarchive app-agent
+  unarchive:
+    src: "{{ local_cache_path }}/{{ role_name }}/app-agent-{{ appagent_version }}.tar.gz"
+    dest: /tmp
+    remote_src: no
+
+- name: install app-agent
+  shell: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/install.sh
+  become: true
+  become_user: root
+  args:
+    chdir: /root/.ansible/cache/mongodb-common/app-agent-linux-arm64/
+    creates: /opt/qingcloud/app-agent
 
 - name: create group caddy
   group:
@@ -181,18 +190,18 @@
     directory_mode: u=rwx,g=rx,o=rx
 
 # - name: modify /opt/app/current/bin/ctl.sh
-#   shell: sed -i 's/local f; for f in $(find \/opt\/app\/current\/bin\/node\/ -name "$fileNames.sh"); do . $f; done/local f; for f in $(eval echo "{$fileNames}.sh"); do . \/opt\/app\/current\/bin\/node\/$f; done/' /opt/app/current/bin/ctl.sh
+  #  shell: sed -i 's/local f; for f in $(find \/opt\/app\/current\/bin\/node\/ -name "$fileNames.sh"); do . $f; done/local f; for f in $(eval echo "{$fileNames}.sh"); do . \/opt\/app\/current\/bin\/node\/$f; done/' /opt/app/current/bin/ctl.sh
   
 - name: install confd files
   include_role:
     name: confd-files-1.1.0
 
-# - name: mask irqbalance.service
-#   systemd:
-#     name: irqbalance
-#     enabled: no
-#     masked: yes
-#     state: stopped
+#  - name: mask irqbalance.service
+#    systemd:
+#      name: irqbalance
+#      enabled: no
+#      masked: yes
+#      state: stopped
 
 - name: enable disable-thp.service
   systemd:
@@ -203,3 +212,10 @@
 
 - name: clear syslog
   shell: ": > /var/log/syslog"
+
+
+# - name: create dirs symbolic link
+#   file:
+#     src: "/opt/app/current/2.0.0"
+#     dest: /opt/app/current
+#     state: link

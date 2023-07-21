@@ -8,12 +8,11 @@
   - include_role:
       name: "{{ name }}"
     loop:
-    - update-apt-sources-1.0.0
-    - disable-apt-jobs-1.0.0
-    - disable-motd-1.0.0
+    # - update-apt-sources-1.0.0
+    # - disable-apt-jobs-1.0.0
+    # - disable-motd-1.0.0
     - app-agent
     - appctl-1.2.7
-    - install-1.0.6
     # - jq
     - mongodb-common
     loop_control:
